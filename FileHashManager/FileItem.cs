@@ -17,6 +17,7 @@ namespace FileHashManager
         public required string FileName { get; set; }
         public required string FilePath { get; set; }
         public string Md5Hash { get; set; } = string.Empty;
+        public TimeSpan ProcessingTime { get; set; }
         public Brush BackgroundColor
         {
             get => _backgroundColor;

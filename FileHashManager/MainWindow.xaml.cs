@@ -59,7 +59,10 @@ namespace FileHashManager
             };
 
             _pendingFileList.Add(fileItem);
-            fileItem.Md5Hash = BitConverter.ToString(await Task.Run(() => HashCalculator.ComputeFileMd5Async(filePath))).Replace("-", "");
+            var stopwatch = Stopwatch.StartNew(); // 开始计时
+            fileItem.Md5Hash = BitConverter.ToString(await Task.Run(() => HashCalculator.ComputeFileMd5Async(filePath))).Replace("-", "").ToLower();
+            stopwatch.Stop(); // 停止计时
+            fileItem.ProcessingTime = stopwatch.Elapsed; // 记录花费的时间
             _pendingFileList.Remove(fileItem);
 
             var existingItem = _processedFileList.FirstOrDefault(f => f.Md5Hash == fileItem.Md5Hash);

@@ -85,6 +85,7 @@
                         </GridViewColumn>
                         <GridViewColumn Header="文件名" Width="200" DisplayMemberBinding="{Binding FileName}"/>
                         <GridViewColumn Header="MD5" Width="auto" DisplayMemberBinding="{Binding Md5Hash}"/>
+                        <GridViewColumn Header="处理时间" DisplayMemberBinding="{Binding ProcessingTime, StringFormat='{}{0:%h}:{0:%m}:{0:%s\\.fff}'}" Width="Auto"/>
                         <GridViewColumn Header="文件路径" Width="auto" DisplayMemberBinding="{Binding FilePath}"/>
                     </GridView>
                 </ListView.View>
