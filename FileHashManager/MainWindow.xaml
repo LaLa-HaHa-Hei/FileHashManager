@@ -18,6 +18,9 @@
             <MenuItem x:Name="AboutMenuItem" Header="帮助" Click="AboutMenuItem_Click">
                 <MenuItem Header="关于"/>
             </MenuItem>
+            <MenuItem Header="工具">
+                <MenuItem Header="文件去重" Click="RemoveDuplicateFiles_Click"/>
+            </MenuItem>
         </Menu>
 
         <!-- 双列布局容器 -->
@@ -29,11 +32,10 @@
             </Grid.ColumnDefinitions>
             
             <!-- 待处理文件列表 -->
-            <ListView x:Name="PendingFilesListView" Grid.Column="0"
-                    ItemsSource="{Binding PendingFiles}">
+            <ListView x:Name="PendingFilesListView" Grid.Column="0">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="待处理文件" 
+                        <GridViewColumn Header="处理中的文件" 
                             Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListView}}"
                             DisplayMemberBinding="{Binding FileName}"/>
                     </GridView>
@@ -41,19 +43,46 @@
             </ListView>
 
             <!-- 可拖动的分隔条 -->
-            <GridSplitter Grid.Column="1"
-                        Width="6"
-                        HorizontalAlignment="Stretch"/>
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch"/>
 
             <!-- 已处理文件列表 -->
             <ListView x:Name="ProcessedFilesListView" Grid.Column="2">
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="从列表移除当前文件" Click="RemoveCurrentFileFromList_Click"/>
+                        <MenuItem Header="从列表移除所有勾选文件" Click="RemoveCheckedFilesFromList_Click"/>
+                        <Separator />
+                        <MenuItem Header="把当前文件放入回收站" Click="DeleteCurrentFileFromLocal_Click"/>
+                        <MenuItem Header="把所有勾选文件放入回收站" Click="DeleteCheckedFilesFromLocal_Click"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
+                        <!--禁止获得焦点后，右键无法获得选择的元素-->
+                        <!--<Setter Property="Focusable" Value="false"/>-->
                         <Setter Property="Background" Value="{Binding BackgroundColor}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{Binding BackgroundColor}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{Binding BackgroundColor}" />
+                                <Setter Property="BorderBrush" Value="Black" />
+                            </Trigger>
+                        </Style.Triggers>
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.View>
                     <GridView>
+                        <GridViewColumn Header="勾选" Width="auto">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center">
+                                    </CheckBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <GridViewColumn Header="文件名" Width="200" DisplayMemberBinding="{Binding FileName}"/>
                         <GridViewColumn Header="MD5" Width="auto" DisplayMemberBinding="{Binding Md5Hash}"/>
                         <GridViewColumn Header="文件路径" Width="auto" DisplayMemberBinding="{Binding FilePath}"/>
@@ -70,8 +99,13 @@
             <StatusBarItem>
                 <TextBlock x:Name="ProcessedStatusTextBlock" Text="已处理：0 个" MinWidth="90"/>
             </StatusBarItem>
-            <StatusBarItem>
-                <TextBlock Text="GitHub："/>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock>
+                    GitHub：
+                    <Hyperlink NavigateUri="https://github.com/LaLa-HaHa-Hei/FileHashManager" Click="Hyperlink_Click">
+    https://github.com/LaLa-HaHa-Hei/FileHashManager
+</Hyperlink>
+                </TextBlock>
             </StatusBarItem>
         </StatusBar>
     </Grid>

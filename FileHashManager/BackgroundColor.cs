@@ -3,7 +3,7 @@ using System.Windows.Media;
 namespace FileHashManager
 {
     /// <summary>
-    /// ²»¶ÏÉú³ÉÒ»ÖÖ²»Í¬µÄÑÕÉ«
+    /// ä¸æ–­ç”Ÿæˆä¸€ç§ä¸åŒçš„é¢œè‰²
     /// </summary>
     public class BackgroundColor
     {
@@ -13,17 +13,17 @@ namespace FileHashManager
 
         public Brush GetNextColor()
         {
-            // µ±Ë÷Òı»Øµ½ 0 Ê±£¬Ôö¼ÓÀÛ»ı²½³¤ (byte »á×Ô¶¯»ØÈÆ)
+            // å½“ç´¢å¼•å›åˆ° 0 æ—¶ï¼Œå¢åŠ ç´¯ç§¯æ­¥é•¿ (byte ä¼šè‡ªåŠ¨å›ç»•)
             if (_index == 0)
                 _accumulatedStep += _step;
 
-            // ³õÊ¼»¯ RGB ·ÖÁ¿Îª°×É«
+            // åˆå§‹åŒ– RGB åˆ†é‡ä¸ºç™½è‰²
             byte[] rgb = { 255, 255, 255 };
 
-            // ¸ù¾İµ±Ç°Ë÷Òı¼õÉÙÏàÓ¦µÄÑÕÉ«·ÖÁ¿ (byte »á×Ô¶¯»ØÈÆ)
+            // æ ¹æ®å½“å‰ç´¢å¼•å‡å°‘ç›¸åº”çš„é¢œè‰²åˆ†é‡ (byte ä¼šè‡ªåŠ¨å›ç»•)
             rgb[_index] -= _accumulatedStep;
 
-            // ¸üĞÂË÷Òı£¬Ñ­»·0~2
+            // æ›´æ–°ç´¢å¼•ï¼Œå¾ªç¯0~2
             _index = (_index + 1) % 3;
 
             return new SolidColorBrush(Color.FromRgb(rgb[0], rgb[1], rgb[2]));
