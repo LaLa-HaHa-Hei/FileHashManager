@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,7 @@ namespace FileHashManager
         private readonly ObservableCollection<FileItem> _pendingFileList = [];
         private readonly ObservableCollection<FileItem> _processedFileList = [];
         private readonly BackgroundColor _backgroundColor = new();
+        private CancellationTokenSource _processingCts = new();
 
         public MainWindow()
         {
@@ -59,23 +61,37 @@ namespace FileHashManager
             };
 
             _pendingFileList.Add(fileItem);
-            var stopwatch = Stopwatch.StartNew(); // 开始计时
-            fileItem.Md5Hash = BitConverter.ToString(await Task.Run(() => HashCalculator.ComputeFileMd5Async(filePath))).Replace("-", "").ToLower();
+                var stopwatch = Stopwatch.StartNew(); // 开始计时
+            try
+            {
+                // 给Task.Run传递CancellationToken，可以在任务开始前执行到这时取消执行
+                // 也可以在Task.Run前检查_processingCts.Token.ThrowIfCancellationRequested();
+                // 给ComputeFileMd5Async传递CancellationToken，可以在任务开始后取消执行
+                var hashBytes = await Task.Run(() => HashCalculator.ComputeFileMd5Async(filePath, _processingCts.Token), _processingCts.Token);
+                fileItem.Md5Hash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+            }
+            catch (OperationCanceledException)
+            {
+                _pendingFileList.Remove(fileItem);
+                return;
+            }
             stopwatch.Stop(); // 停止计时
             fileItem.ProcessingTime = stopwatch.Elapsed; // 记录花费的时间
             _pendingFileList.Remove(fileItem);
-
+            // 如何之前有相同哈希的文件，则使用相同背景色（白色以外）
             var existingItem = _processedFileList.FirstOrDefault(f => f.Md5Hash == fileItem.Md5Hash);
             if (existingItem != null)
             {
                 if (existingItem.BackgroundColor == Brushes.Transparent)
                 {
+                    // 获取新的一种颜色
                     var newColor = _backgroundColor.GetNextColor();
                     existingItem.BackgroundColor = newColor;
                     fileItem.BackgroundColor = newColor;
                 }
                 else
                 {
+                    // 跟已有的元素使用相同颜色
                     fileItem.BackgroundColor = existingItem.BackgroundColor;
                 }
             }
@@ -232,6 +248,14 @@ namespace FileHashManager
                 collectionView.SortDescriptions.Clear();
                 collectionView.SortDescriptions.Add(new SortDescription(sortBy, direction));
             }
+        }
+
+        private void CancelProcessingMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            // 通知正在进行中的任务取消
+            _processingCts.Cancel();
+            // 为下次处理创建新的令牌
+            _processingCts = new CancellationTokenSource();
         }
     }
 }

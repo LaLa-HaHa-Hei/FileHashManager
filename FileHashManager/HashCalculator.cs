@@ -9,16 +9,26 @@ namespace FileHashManager
 {
     public class HashCalculator
     {
-        public static async ValueTask<byte[]> ComputeMd5Async(Stream stream)
+        public static async Task<byte[]> ComputeMd5Async(
+            Stream stream,
+            CancellationToken cancellationToken = default)
         {
+            // 检查取消请求（可选，但建议在耗时操作前检查）
+            cancellationToken.ThrowIfCancellationRequested();
+
             using var md5 = MD5.Create();
-            return await md5.ComputeHashAsync(stream);
+            return await md5.ComputeHashAsync(stream, cancellationToken);
         }
 
-        public static async Task<byte[]> ComputeFileMd5Async(string filePath)
+        public static async Task<byte[]> ComputeFileMd5Async(
+            string filePath,
+            CancellationToken cancellationToken = default)
         {
+            // 检查取消请求（例如在打开文件前）
+            cancellationToken.ThrowIfCancellationRequested();
+
             await using var stream = File.OpenRead(filePath);
-            return await ComputeMd5Async(stream);
+            return await ComputeMd5Async(stream, cancellationToken);
         }
 
         //public static async Task<byte[]> ComputeFileMd5Async2(string filePath)

@@ -15,6 +15,7 @@
         
         <!-- 菜单栏 -->
         <Menu Grid.Row="0">
+            <MenuItem x:Name="CancelProcessingMenuItem" Header="取消处理" Click="CancelProcessingMenuItem_Click" />
             <MenuItem x:Name="AboutMenuItem" Header="帮助" Click="AboutMenuItem_Click">
                 <MenuItem Header="关于"/>
             </MenuItem>
